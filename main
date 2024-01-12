@@ -1,0 +1,66 @@
+import os
+
+
+def is_admin():
+    # Check if the script is running with administrative privileges on Windows
+    try:
+        return os.name == 'nt' and os.environ.get('USERNAME') == 'Administrator'
+    except AttributeError:
+        return False
+
+
+def clear_cache_and_display_deleted_files():
+    if not is_admin():
+        print("Please run this script with administrative privileges on a Windows system.")
+        return
+
+    # List of common cache locations on Windows 10
+    cache_locations = [
+        r'C:\Windows\Temp',
+        r'C:\Users\YourUsername\AppData\Local\Temp',
+        r'C:\Users\YourUsername\AppData\Local\Microsoft\Windows\INetCache',
+        r'C:\Windows\Prefetch'
+        # Add more locations as needed
+    ]
+
+    deleted_files = []
+
+    # Iterate through each cache location
+    for location in cache_locations:
+        if os.path.exists(location):
+            print(f"Clearing cache in: {location}")
+
+            # Iterate through files in the current cache location
+            for file_name in os.listdir(location):
+                file_path = os.path.join(location, file_name)
+
+                try:
+                    # Display the file and prompt for deletion
+                    print(f"File: {file_path}")
+                    user_input = input("Do you want to delete this file? (y/n): ").lower()
+
+                    if user_input == 'y':
+                        # Attempt to delete the file
+                        if os.path.isfile(file_path):
+                            os.remove(file_path)
+                            deleted_files.append(file_path)
+                            print(f"File deleted: {file_path}")
+                        else:
+                            print(f"Not a valid file: {file_path}")
+                    else:
+                        print(f"File not deleted: {file_path}")
+
+                except Exception as e:
+                    print(f"Error processing file {file_path}: {e}")
+
+    # Display the names of deleted files
+    if deleted_files:
+        print("\nDeleted files:")
+        for deleted_file in deleted_files:
+            print(deleted_file)
+    else:
+        print("\nNo files deleted.")
+
+
+if __name__ == "__main__":
+    clear_cache_and_display_deleted_files()
